@@ -4,14 +4,15 @@ import fetchNews from "./sideEffects/FetchLatestNews";
 export const getNews = createAsyncThunk(
   "news/getNews",
   async (category, { getState }) => {
-    const { newsByCategory } = getState().news;
+    const { newsByCategory, nextPageByCategory } = getState().news;
 
     if (newsByCategory[category]?.length > 0) {
+      // Preserve existing nextPage when using cached data
       return { 
         cached: true, 
         category, 
         data: newsByCategory[category],
-        nextPage: null
+        nextPage: nextPageByCategory[category] || null
       };
     }
 
@@ -59,6 +60,8 @@ const newsSlice = createSlice({
   reducers: {
     setCategory(state, action) {
       state.currentCategory = action.payload;
+      // Clear error when switching categories
+      state.error = null;
     },
 
     loadLikes(state) {
@@ -71,10 +74,22 @@ const newsSlice = createSlice({
       const existing = localStorage.getItem("likedNews");
       let likes = existing ? JSON.parse(existing) : [];
 
-      // prevent duplicates
-      if (!likes.some((i) => i.id === item.id)) {
+      // prevent duplicates by newsUrl
+      if (!likes.some((i) => i.newsUrl === item.newsUrl)) {
         likes.push(item);
       }
+
+      localStorage.setItem("likedNews", JSON.stringify(likes));
+      state.newsByCategory["likes"] = likes;
+    },
+
+    removeFromLikes(state, action) {
+      const newsUrl = action.payload;
+      const existing = localStorage.getItem("likedNews");
+      let likes = existing ? JSON.parse(existing) : [];
+
+      // Remove item by newsUrl
+      likes = likes.filter((item) => item.newsUrl !== newsUrl);
 
       localStorage.setItem("likedNews", JSON.stringify(likes));
       state.newsByCategory["likes"] = likes;
@@ -89,15 +104,16 @@ const newsSlice = createSlice({
       })
 
       .addCase(getNews.fulfilled, (state, action) => {
-        const { category, data, nextPage } = action.payload;
+        const { category, data, nextPage, cached } = action.payload;
         state.loading = false;
 
         // Save fetched or cached data
         state.newsByCategory[category] = data;
-        // Store nextPage for pagination
-        if (nextPage !== undefined) {
+        // Only update nextPage if it's a new fetch (not cached), or if nextPage is explicitly provided
+        if (!cached && nextPage !== undefined) {
           state.nextPageByCategory[category] = nextPage;
         }
+        // If cached, preserve existing nextPage (already set in the thunk return value)
       })
 
       .addCase(getNews.rejected, (state, action) => {
@@ -113,6 +129,7 @@ const newsSlice = createSlice({
       .addCase(loadMoreNews.fulfilled, (state, action) => {
         const { category, data, nextPage } = action.payload;
         state.loadingMore = false;
+        state.error = null; // Clear error on successful load
 
         // Append new data to existing news
         const existingNews = state.newsByCategory[category] || [];
@@ -124,9 +141,13 @@ const newsSlice = createSlice({
       .addCase(loadMoreNews.rejected, (state, action) => {
         state.loadingMore = false;
         state.error = action.error.message || "Something went wrong";
+        // Clear nextPage to prevent infinite retry loop on error
+        // This stops the scroll handler from continuously trying to load more
+        const category = action.meta.arg;
+        state.nextPageByCategory[category] = null;
       });
   },
 });
 
-export const { setCategory, loadLikes, addToLikes } = newsSlice.actions;
+export const { setCategory, loadLikes, addToLikes, removeFromLikes } = newsSlice.actions;
 export default newsSlice.reducer;

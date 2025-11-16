@@ -11,11 +11,14 @@ import {
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { useDispatch } from "react-redux";
+import { addToLikes, removeFromLikes } from "../newsSlice";
 
 const NewsCard = ({ data }) => {
   const { title, snippet, images, newsUrl, publisher } = data;
   const [liked, setLiked] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const dispatch = useDispatch();
 
   const getValidImageUrl = (url) => {
     return url && typeof url === "string" && url.trim() ? url.trim() : null;
@@ -42,15 +45,14 @@ const NewsCard = ({ data }) => {
 
   const toggleLike = (e) => {
     e.stopPropagation();
-    const storedLikes = JSON.parse(localStorage.getItem("likedNews")) || [];
 
     if (liked) {
-      const updated = storedLikes.filter((item) => item.newsUrl !== newsUrl);
-      localStorage.setItem("likedNews", JSON.stringify(updated));
+      // Remove from likes
+      dispatch(removeFromLikes(newsUrl));
       setLiked(false);
     } else {
-      const updated = [...storedLikes, data];
-      localStorage.setItem("likedNews", JSON.stringify(updated));
+      // Add to likes
+      dispatch(addToLikes(data));
       setLiked(true);
     }
   };

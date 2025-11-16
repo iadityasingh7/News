@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { Button } from "@mui/material";
+import { Button, IconButton, Menu, MenuItem } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import MenuIcon from "@mui/icons-material/Menu";
 
 import { useDispatch } from "react-redux";
 import { setCategory, getNews, loadLikes } from "../newsSlice";
@@ -23,6 +24,7 @@ const pages = ["Latest", "Market", "Crypto", "Likes"];
 
 function Header() {
   const dispatch = useDispatch();
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = (page) => {
     if (page === "Likes") {
@@ -36,19 +38,31 @@ function Header() {
     dispatch(getNews(category));
   };
 
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
+
   const appBarHeight = 64;
 
   return (
     <ThemeProvider theme={darkTheme}>
       <AppBar position="fixed">
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            NEWS
-          </Typography>
+          {/* Logo*/}
+          <Box
+            component="img"
+            src="/logotype.png"
+            alt="News Logo"
+            sx={{
+              height: 60,
+              width: "auto",
+              cursor: "pointer",
+            }}
+          />
 
+          {/* Desktop Buttons */}
           <Box
             sx={{
-              display: "flex",
+              display: { xs: "none", md: "flex" }, // hide on mobile
               gap: 2,
               flexGrow: 1,
               justifyContent: "center",
@@ -71,9 +85,45 @@ function Header() {
               </Button>
             ))}
           </Box>
+
+          {/* Mobile Menu */}
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton color="inherit" onClick={handleMenuOpen}>
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              sx={{
+                width: "350px",
+              }}
+            >
+              {pages.map((page) => (
+                <MenuItem
+                  key={page}
+                  onClick={() => {
+                    handleClick(page);
+                    handleMenuClose();
+                  }}
+                >
+                  {page}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
         </Toolbar>
       </AppBar>
 
+      {/* Spacer for fixed AppBar */}
       <Box sx={{ height: appBarHeight }} />
     </ThemeProvider>
   );

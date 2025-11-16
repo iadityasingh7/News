@@ -13,6 +13,7 @@ function MainScreen() {
     loading,
     loadingMore,
     nextPageByCategory,
+    error,
   } = useSelector((s) => s.news);
 
   const news = newsByCategory[currentCategory] || [];
@@ -30,18 +31,18 @@ function MainScreen() {
 
   // Infinite scroll handler
   const handleScroll = useCallback(() => {
-    if (loading || loadingMore || !nextPage || currentCategory === "likes") {
+    if (loading || loadingMore || !nextPage || currentCategory === "likes" || error) {
       return;
     }
 
     if (observerTarget.current) {
       const rect = observerTarget.current.getBoundingClientRect();
-      if (rect.top <= window.innerHeight + 100) {
-        // Load more when user is within 100px of the bottom
+      if (rect.top <= window.innerHeight + 40) {
+        // Load more when user is within 40px of the bottom
         dispatch(loadMoreNews(currentCategory));
       }
     }
-  }, [loading, loadingMore, nextPage, currentCategory, dispatch]);
+  }, [loading, loadingMore, nextPage, currentCategory, error, dispatch]);
 
   // Set up scroll listener
   useEffect(() => {
