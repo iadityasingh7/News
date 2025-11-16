@@ -103,8 +103,23 @@ function Header() {
                 vertical: "top",
                 horizontal: "right",
               }}
-              sx={{
-                width: "350px",
+              PaperProps={{
+                sx: {
+                  width: "250px",
+                  minWidth: "220px",
+                  maxWidth: "90vw",
+                  mt: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                  fontSize: "1.2rem",
+                  fontWeight: "bold",
+                  color: "white",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                },
               }}
             >
               {pages.map((page) => (

@@ -20,6 +20,11 @@ function MainScreen() {
   const nextPage = nextPageByCategory[currentCategory];
   const observerTarget = useRef(null);
 
+  // Scroll to top when category changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentCategory]);
+
   // Skip API call when category is likes load from localStorage
   useEffect(() => {
     if (currentCategory === "likes") {
@@ -31,7 +36,13 @@ function MainScreen() {
 
   // Infinite scroll handler
   const handleScroll = useCallback(() => {
-    if (loading || loadingMore || !nextPage || currentCategory === "likes" || error) {
+    if (
+      loading ||
+      loadingMore ||
+      !nextPage ||
+      currentCategory === "likes" ||
+      error
+    ) {
       return;
     }
 
@@ -61,9 +72,17 @@ function MainScreen() {
 
   if (news.length === 0)
     return (
-      <Box sx={{ pt: 3, px: { xs: 2, sm: 3, md: 4 } }}>
+      <Box
+        sx={{
+          pt: 3,
+          px: { xs: 2, sm: 3, md: 4 },
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Typography textAlign="center" mt={5}>
-          No news found
+          No liked articles yet. Tap the heart to save your favorites.
         </Typography>
       </Box>
     );
