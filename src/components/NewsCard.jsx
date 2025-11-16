@@ -61,6 +61,7 @@ const NewsCard = ({ data }) => {
     <Card
       sx={{
         width: "100%",
+        minWidth: "100%",
         maxWidth: 360,
         height: "100%",
         display: "flex",
