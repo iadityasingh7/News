@@ -89,7 +89,26 @@ function MainScreen() {
 
   return (
     <Box sx={{ pt: 3, px: { xs: 2, sm: 3, md: 4 } }}>
-      <Grid container spacing={3} justifyContent="center" alignItems="stretch">
+      <Box display={"flex"} justifyContent={"center"}>
+        <Grid
+          container
+          spacing={3}
+          sx={{
+            maxWidth: {
+              xs: "100%",
+              sm: "740px",
+              md: "960px",
+              lg: "1128px",
+            },
+            justifyContent: {
+              xs: "center",
+              sm: "center",
+              md: "center",
+              lg: "flex-start",
+            },
+            mx: "auto",
+          }}
+        >
         {news.map((item, index) => (
           <Grid
             item
@@ -106,6 +125,7 @@ function MainScreen() {
           </Grid>
         ))}
       </Grid>
+      </Box>
 
       {/* Infinite scroll trigger element */}
       {nextPage && currentCategory !== "likes" && (
